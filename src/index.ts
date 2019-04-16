@@ -3,7 +3,8 @@ import * as ref from 'ref';
 
 const lib_path = '../secure-element-abstraction/inc/sec_elem_abstr.h';
 
-const intPtr = ref.refType('int');
+const int8_Ptr = ref.refType(ref.types.int8);
+const int16_Ptr = ref.refType(ref.types.int16);
 
 enum Result {
   SE_SUCCESS      = 0x00,
@@ -15,32 +16,97 @@ enum Result {
 }
 
 const sec_el = ffi.Library(lib_path, {
-  // SE_STATUS se_get_random(uint8_t* rand_out , uint8_t randomLen);
-  'se_get_random': ['int', [intPtr, 'int']],
+  /**
+   * SE_STATUS se_get_random(uint8_t* rand_out , uint8_t randomLen);
+   * Retrieves a random byte array of size randomLen from the Secure Module.
+   * @param[in,out] random  IN: buffer to contain random value (at least of size randomLen);
+   *                       OUT: retrieved random data
+   * @param[in] randomLen Amount of byte to retrieve
+   * @retval ::SE_SUCCESS Upon successful execution
+   */
+  'se_get_random': ['int', [int8_Ptr, 'int']],
 
-  // SE_STATUS se_get_pubkey(uint8_t index, uint8_t* publicKey , uint16_t* publicKeyLen);
-  'se_get_pubkey': ['int', ['int', intPtr, intPtr]],
+  /**
+    * SE_STATUS se_get_pubkey(uint8_t index, uint8_t* publicKey , uint16_t* publicKeyLen);
+    * Retrieves one of the public keys stored in one of the slots.
+    * @param[in] index The slot number for reading the public key
+    * @param[in,out] publicKey  IN: buffer to contain public key with th length of publicKeyLen;
+    *                          OUT: retrieved public key
+    * @param[in] publicKeyLen Pointer to the length of the retrieved public key
+    * @retval ::SE_SUCCESS Upon successful execution
+    *         ::BAD_PARAM In case of a key_id too large for ATECC608
+  */
+  'se_get_pubkey': ['int', ['int', int8_Ptr, int16_Ptr]],
 
-  // SE_STATUS se_sign(uint8_t index, const uint8_t *msg, uint16_t msglen, uint8_t *psignature, uint16_t *pSignatureLen);
-  'se_sign': ['int', ['int', intPtr, 'int', intPtr, intPtr]],
+  /**
+    * SE_STATUS se_sign(uint8_t index, const uint8_t *msg, uint16_t msglen, uint8_t *psignature, uint16_t *pSignatureLen);
+    * Signs a given message using the key stored in one of the slots.
+    * @param[in] index The slot number for reading the public key
+    * @param[in] msg buffer to contain the message to be signed;
+    * @param[in] msglen The length of the message to be signed.
+    * @param[in,out] pSignature  IN: buffer to contain the signed message;
+    *                           OUT: the signed message
+    * @param[in] msglen Pointer to the length of the signed message
+    * @retval ::SE_SUCCESS Upon successful execution
+    *         ::BAD_PARAM In case of a message not being the right length(32Byte) for ATECC608
+  */
+  'se_sign': ['int', ['int', int8_Ptr, 'int', int8_Ptr, int16_Ptr]],
 
-  //SE_STATUS se_verify(uint8_t index, const uint8_t *pHash, uint16_t hashLen, const uint8_t *pSignature, uint16_t signatureLen);
-  'se_verify': ['int', ['int', intPtr, 'int', intPtr, 'int']],
+  /**
+   * SE_STATUS se_verify(uint8_t index, const uint8_t *pHash, uint16_t hashLen, const uint8_t *pSignature, uint16_t signatureLen);
+   * Verifies a given signature using the key stored in one of the slots and the original message.
+   * @param[in] index The slot number for reading the public key
+   * @param[in] pHash buffer to the content to be verified;
+   * @param[in] hashLen The length of the content to be verified.
+   * @param[in] pSignature  IN: buffer to contain the signed message;
+   * @param[in] msglen The length of the signed message
+   * @retval ::SE_SUCCESS Upon successful execution
+   */
+  'se_verify': ['int', ['int', int8_Ptr, 'int', int8_Ptr, 'int']],
 
-  //SE_STATUS se_init();
+  /**
+   * SE_STATUS se_init();
+   * Initilazes the secure element.
+   * @retval ::SE_SUCCESS Upon successful execution
+   */
   'se_init': ['int', []],
 
-  //SE_STATUS se_generate_keypair(uint8_t index);
+  /**
+   * SE_STATUS se_generate_keypair(uint8_t index);
+   * Generates a key pair inside one of the slots.
+   * @param[in] index The slot number
+   * @retval ::SE_SUCCESS Upon successful execution
+   */
   'se_generate_keypair': ['int', ['int']],
-
-  //SE_STATUS se_get_sha256(uint8_t* pMessage, uint16_t msgLen, uint8_t* sha, uint16_t*shaLen);
-  'se_get_sha256': ['int', [intPtr, 'int', intPtr, intPtr]],
 });
 
-export default {
-  get_random: _ => ,
-  get_pubkey: _ => ,
-  sign: _ => ,
-  verify: _ => ,
-  init: _ =>
-};
+export default () => {
+  const result = sec_el.init();
+  if (result != Result.SE_SUCCESS) {
+    throw new Error(`Secure Element initialisation failed with code: ${result}`);
+  }
+
+  return {
+    get_random: (): Buffer => {
+      const len = 64;
+      const rand = Buffer.alloc(len);
+      const result = sec_el.se_get_random(rand, len);
+      if (result == Result.SE_SUCCESS) {
+        return rand;
+      } else {
+        throw new Error(`Secure Element random number generation failed with code: ${result}`);
+      }
+    },
+    get_pubkey: (index: number): Buffer => {
+      const pubKey = Buffer.alloc(64);
+      const res_len = ref.alloc(ref.types.int16);
+      const result = sec_el.se_get_pubkey(index, pubKey, res_len);
+      if (result == Result.SE_SUCCESS) {
+        return pubKey;
+      } else {
+        throw new Error(`Secure Element public key read failed with code: ${result}`);
+      }
+    },
+    sign: () => {},
+    verify: () => {},
+  }};
