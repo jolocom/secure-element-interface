@@ -3,9 +3,12 @@ import * as ref from 'ref';
 
 const lib_path = '../secure-element-abstraction/inc/sec_elem_abstr.h';
 
-const int8_Ptr = ref.refType(ref.types.int8);
-const int16_Ptr = ref.refType(ref.types.int16);
+const uint8_t = ref.types.uint8;
+const uint16_t = ref.types.uint16;
+const uint8_Ptr = ref.refType(uint8_t);
+const uint16_Ptr = ref.refType(uint16_t);
 
+const res_t = uint8_t;
 enum Result {
   SE_SUCCESS      = 0x00,
   SE_COM_FAIL     = 0xF7,
@@ -24,7 +27,7 @@ const sec_el = ffi.Library(lib_path, {
    * @param[in] randomLen Amount of byte to retrieve
    * @retval ::SE_SUCCESS Upon successful execution
    */
-  'se_get_random': ['int', [int8_Ptr, 'int']],
+  'se_get_random': [res_t, [uint8_Ptr, uint8_t]],
 
   /**
     * SE_STATUS se_get_pubkey(uint8_t index, uint8_t* publicKey , uint16_t* publicKeyLen);
@@ -36,7 +39,7 @@ const sec_el = ffi.Library(lib_path, {
     * @retval ::SE_SUCCESS Upon successful execution
     *         ::BAD_PARAM In case of a key_id too large for ATECC608
   */
-  'se_get_pubkey': ['int', ['int', int8_Ptr, int16_Ptr]],
+  'se_get_pubkey': [res_t, [uint8_t, uint8_Ptr, uint16_Ptr]],
 
   /**
     * SE_STATUS se_sign(uint8_t index, const uint8_t *msg, uint16_t msglen, uint8_t *psignature, uint16_t *pSignatureLen);
@@ -50,7 +53,7 @@ const sec_el = ffi.Library(lib_path, {
     * @retval ::SE_SUCCESS Upon successful execution
     *         ::BAD_PARAM In case of a message not being the right length(32Byte) for ATECC608
   */
-  'se_sign': ['int', ['int', int8_Ptr, 'int', int8_Ptr, int16_Ptr]],
+  'se_sign': [res_t, [uint8_t, uint8_Ptr, uint16_t, uint8_Ptr, uint16_Ptr]],
 
   /**
    * SE_STATUS se_verify(uint8_t index, const uint8_t *pHash, uint16_t hashLen, const uint8_t *pSignature, uint16_t signatureLen);
@@ -62,14 +65,14 @@ const sec_el = ffi.Library(lib_path, {
    * @param[in] msglen The length of the signed message
    * @retval ::SE_SUCCESS Upon successful execution
    */
-  'se_verify': ['int', ['int', int8_Ptr, 'int', int8_Ptr, 'int']],
+  'se_verify': [res_t, [uint8_t, uint8_Ptr, uint16_t, uint8_Ptr, uint16_t]],
 
   /**
    * SE_STATUS se_init();
    * Initilazes the secure element.
    * @retval ::SE_SUCCESS Upon successful execution
    */
-  'se_init': ['int', []],
+  'se_init': [res_t, []],
 
   /**
    * SE_STATUS se_generate_keypair(uint8_t index);
@@ -77,7 +80,7 @@ const sec_el = ffi.Library(lib_path, {
    * @param[in] index The slot number
    * @retval ::SE_SUCCESS Upon successful execution
    */
-  'se_generate_keypair': ['int', ['int']],
+  'se_generate_keypair': [res_t, [uint8_t]],
 });
 
 export default () => {
@@ -99,7 +102,7 @@ export default () => {
     },
     get_pubkey: (index: number): Buffer => {
       const pubKey = Buffer.alloc(64);
-      const res_len = ref.alloc(ref.types.int16);
+      const res_len = ref.alloc(ref.types.uint16);
       const result = sec_el.se_get_pubkey(index, pubKey, res_len);
       if (result == Result.SE_SUCCESS) {
         return pubKey;
