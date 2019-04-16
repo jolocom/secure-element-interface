@@ -90,8 +90,7 @@ export default () => {
   }
 
   return {
-    get_random: (): Buffer => {
-      const len = 64;
+    get_random: (len: number): Buffer => {
       const rand = Buffer.alloc(len);
       const result = sec_el.se_get_random(rand, len);
       if (result == Result.SE_SUCCESS) {
@@ -102,7 +101,7 @@ export default () => {
     },
     get_pubkey: (index: number): Buffer => {
       const pubKey = Buffer.alloc(64);
-      const res_len = ref.alloc(ref.types.uint16);
+      const res_len = ref.alloc(uint16_t);
       const result = sec_el.se_get_pubkey(index, pubKey, res_len);
       if (result == Result.SE_SUCCESS) {
         return pubKey;
@@ -110,6 +109,24 @@ export default () => {
         throw new Error(`Secure Element public key read failed with code: ${result}`);
       }
     },
-    sign: () => {},
-    verify: () => {},
+    sign: (key: number, message: Buffer): Buffer => {
+      const sig = Buffer.alloc(100);
+      const res_len = ref.alloc(uint16_t);
+      const result = sec_el.se_sign(key, message, message.byteLength, sig, res_len);
+      if (result == Result.SE_SUCCESS) {
+        return sig;
+      } else {
+        throw new Error(`Secure Element signing failed with code: ${result}`);
+      }
+    },
+    verify: (key: number, content: Buffer, signature: Buffer): boolean => {
+      const result = sec_el.se_verify(key, content, content.byteLength, signature, signature.byteLength);
+      if (result == Result.SE_VERIFY_SUCCESS) {
+        return true;
+      } else if (result == Result.SE_VERIFY_FAIL) {
+        return false;
+      } else {
+        throw new Error(`Secure Element verification failed with code: ${result}`);
+      }
+    },
   }};
