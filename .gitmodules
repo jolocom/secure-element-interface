@@ -1,3 +1,6 @@
 [submodule "secure-element-abstraction"]
 	path = secure-element-abstraction
 	url = https://github.com/RiddleAndCode/secure-element-abstraction.git
+[submodule "tools"]
+	path = tools
+	url = https://github.com/raspberrypi/tools.git
