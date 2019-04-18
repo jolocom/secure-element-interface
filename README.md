@@ -3,14 +3,10 @@ This project provides the Riddle and Code Secure Element as a npm module with a 
 
 ## Building
 ### SEA library
-Steps to build the secure element abstraction dynamic library:
-1. clone this repo (with --recursive for the submodules)
-2. create a build folder and enter it
-3. run ```cmake ../secure-element-abstraction/ -DTARGET_GROUP=v2 -DCMAKE_TOOLCHAIN_FILE=../toolchain-rpi.cmake```
-4. run ```make```
+the build the library, simply run build.sh
+NOTE: the generated .so binary is for arm6, specifically a raspberry pi
 
 ### Interface Package
 Steps to package:
 1. ensure you have built the SEA library as above
-2. copy build/src/libseadyn.so to the top level
-3. run npm package
+2. run npm package
