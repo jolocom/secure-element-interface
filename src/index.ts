@@ -1,7 +1,7 @@
 import * as ffi from 'ffi-napi';
 import * as ref from 'ref';
 
-const lib_path = '../secure-element-abstraction/inc/sec_elem_abstr.h';
+const lib_path = '../libseadyn.so';
 
 const uint8_t = ref.types.uint8;
 const uint16_t = ref.types.uint16;
