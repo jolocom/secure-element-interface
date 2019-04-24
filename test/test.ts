@@ -16,10 +16,14 @@ assert( (rand1.equals(rand2) === false) &&
 console.log('Check key pair generation');
 SE.generateKeyPair(0);
 
-const key0 = SE.getPublicKey(0);
-console.log(key0.byteLength);
-assert(key0.byteLength);
-assert(key0.equals(SE.getPublicKey(0)) === true);
+const key1 = SE.getPublicKey(0);
+console.log(key1.byteLength);
+assert(key1.byteLength);
+assert(key1.equals(SE.getPublicKey(0)) === true);
 
 SE.generateKeyPair(0);
-assert(key0.equals(SE.getPublicKey(0)) === false);
+const key2 = SE.getPublicKey(0);
+assert(key1.equals(key2) === false);
+
+SE.wipeKeyPair(0);
+assert(key2.equals(SE.getPublicKey(0)) === false)
