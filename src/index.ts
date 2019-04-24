@@ -82,6 +82,11 @@ const get_sec_el = () => ffi.Library(lib_path, {
    * @retval ::SE_SUCCESS Upon successful execution
    */
   'se_generate_keypair': [res_t, [uint8_t]],
+
+  /**
+   * SE_STATUS se_wipe_device(uint8_t index);
+   */
+  'se_wipe_device': [res_t, [uint8_t]],
 });
 
 export class SecureElement implements ISecureElement {
@@ -141,6 +146,11 @@ export class SecureElement implements ISecureElement {
 
   public generateKeyPair(index: number): boolean  {
     const result = this.sec_el.se_generate_keypair(index);
+    return result == Result.SE_SUCCESS;
+  }
+
+  public wipeKeyPair(index: number): boolean {
+    const result = this.sec_el.se_wipe_device(index);
     return result == Result.SE_SUCCESS;
   }
 };

@@ -4,4 +4,6 @@ export interface ISecureElement {
   getPublicKey: (index: number) => Buffer
   sign: (key: number, message: Buffer) => Buffer
   verify: (key: number, content: Buffer, signature: Buffer) => boolean
+  generateKeyPair: (index: number) => boolean
+  wipeKeyPair: (index: number) => boolean
 }
