@@ -2,11 +2,13 @@
   "name": "secure-element-interface",
   "version": "0.1.0",
   "description": "a JS interface for s Riddle and Code Secure Element",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": ["dist", "libseadyn.so"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "rm -rf dist && tsc"
   },
-  "author": "",
+  "author": "charles cunningham (Jolocom)",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^11.13.4",
