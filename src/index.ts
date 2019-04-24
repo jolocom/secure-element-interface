@@ -83,7 +83,7 @@ const sec_el = ffi.Library(lib_path, {
   'se_generate_keypair': [res_t, [uint8_t]],
 });
 
-export default {
+const secureElement = {
   init: () => {
     const result = sec_el.se_init();
     if (result != Result.SE_SUCCESS) {
@@ -100,7 +100,7 @@ export default {
     }
   },
   getPubkey: (index: number): Buffer => {
-    const pubKey = Buffer.alloc(64);
+    const pubKey = Buffer.alloc(65);
     const res_len = ref.alloc(uint16_t);
     const result = sec_el.se_get_pubkey(index, pubKey, res_len);
     if (result == Result.SE_SUCCESS) {
@@ -134,3 +134,5 @@ export default {
     return result == Result.SE_SUCCESS;
   }
 };
+
+export default secureElement;
