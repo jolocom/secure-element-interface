@@ -1,9 +1,12 @@
 {
   "name": "secure-element-interface",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "a JS interface for s Riddle and Code Secure Element",
   "main": "dist/index.js",
-  "files": ["dist", "libseadyn.so"],
+  "files": [
+    "dist",
+    "libseadyn.so"
+  ],
   "scripts": {
     "test": "./sea_test && cd test && ts-node test.ts",
     "prepare": "rm -rf dist && tsc"
