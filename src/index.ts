@@ -85,7 +85,7 @@ const sec_el = ffi.Library(lib_path, {
 
 export default {
   init: () => {
-    const result = sec_el.el_init();
+    const result = sec_el.se_init();
     if (result != Result.SE_SUCCESS) {
       throw new Error(`Secure Element initialisation failed with code: ${result}`);
     }
