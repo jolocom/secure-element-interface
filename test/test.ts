@@ -26,4 +26,4 @@ const key2 = SE.getPublicKey(0);
 assert(key1.equals(key2) === false);
 
 SE.wipeKeyPair(0);
-assert(key2.equals(SE.getPublicKey(0)) === false)
+assert.throws(() => SE.getPublicKey(0));
