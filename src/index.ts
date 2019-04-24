@@ -90,7 +90,7 @@ export class SecureElement implements ISecureElement {
   constructor() {
     this.sec_el = get_sec_el();
 
-    const result = this.sec_el.se_init():
+    const result = this.sec_el.se_init();
     if (result != Result.SE_SUCCESS) {
       throw new Error(`Secure Element initialisation failed with code: ${result}`);
     }
