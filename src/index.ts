@@ -100,11 +100,9 @@ const secureElement = {
     }
   },
   getPubkey: (index: number): Buffer => {
-    const pubKey = Buffer.alloc(64);
-    const res_len = ref.alloc(uint16_t, 64);
+    const res_len = ref.alloc(uint16_t, 128 + 8)
+    const pubKey = Buffer.alloc(ref.deref(res_len));
     const result = sec_el.se_get_pubkey(index, pubKey, res_len);
-    console.log(res_len.readUInt8);
-    console.log(pubKey);
     if (result == Result.SE_SUCCESS) {
       return pubKey;
     } else {
