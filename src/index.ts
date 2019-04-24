@@ -1,5 +1,6 @@
 import * as ffi from 'ffi-napi';
-import * as ref from 'ref';
+import * as ref from 'ref-napi';
+import {ISecureElement} from './types';
 
 const lib_path = '../libseadyn.so';
 
@@ -18,7 +19,7 @@ enum Result {
   SE_VERIFY_FAIL = 0xF5,
 }
 
-const sec_el = ffi.Library(lib_path, {
+const get_sec_el = () => ffi.Library(lib_path, {
   /**
    * SE_STATUS se_get_random(uint8_t* rand_out , uint8_t randomLen);
    * Retrieves a random byte array of size randomLen from the Secure Module.
@@ -83,44 +84,52 @@ const sec_el = ffi.Library(lib_path, {
   'se_generate_keypair': [res_t, [uint8_t]],
 });
 
-const secureElement = {
-  init: () => {
-    const result = sec_el.se_init();
+export class SecureElement implements ISecureElement {
+  private readonly sec_el;
+
+  constructor() {
+    this.sec_el = get_sec_el();
+
+    const result = this.sec_el.se_init();
     if (result != Result.SE_SUCCESS) {
       throw new Error(`Secure Element initialisation failed with code: ${result}`);
     }
-  },
-  getRandom: (len: number): Buffer => {
+  }
+
+  public getRandom(len: number): Buffer {
     const rand = Buffer.alloc(len);
-    const result = sec_el.se_get_random(rand, len);
+    const result = this.sec_el.se_get_random(rand, len);
     if (result == Result.SE_SUCCESS) {
       return rand;
     } else {
       throw new Error(`Secure Element random number generation failed with code: ${result}`);
     }
-  },
-  getPubkey: (index: number): Buffer => {
+  }
+
+  public getPublicKey(index: number): Buffer {
     const res_len = ref.alloc(uint16_t, 128 + 8)
     const pubKey = Buffer.alloc(ref.deref(res_len));
-    const result = sec_el.se_get_pubkey(index, pubKey, res_len);
+    const result = this.sec_el.se_get_pubkey(index, pubKey, res_len);
     if (result == Result.SE_SUCCESS) {
       return pubKey;
     } else {
       throw new Error(`Secure Element public key read failed with code: ${result}`);
     }
-  },
-  sign: (key: number, message: Buffer): Buffer => {
+  }
+
+  public sign(key: number, message: Buffer): Buffer {
     const sig = Buffer.alloc(100);  // TODO allocate a better size than 100
     const res_len = ref.alloc(uint16_t);
-    const result = sec_el.se_sign(key, message, message.byteLength, sig, res_len);
+    const result = this.sec_el.se_sign(key, message, message.byteLength, sig, res_len);
     if (result == Result.SE_SUCCESS) {
       return sig;
     } else {
       throw new Error(`Secure Element signing failed with code: ${result}`);
     }
-  },
-  verify: (key: number, content: Buffer, signature: Buffer): boolean => {
-    const result = sec_el.se_verify(key, content, content.byteLength, signature, signature.byteLength);
+  }
+
+  public verify(key: number, content: Buffer, signature: Buffer): boolean {
+    const result = this.sec_el.se_verify(key, content, content.byteLength, signature, signature.byteLength);
     if (result == Result.SE_VERIFY_SUCCESS) {
       return true;
     } else if (result == Result.SE_VERIFY_FAIL) {
@@ -128,11 +137,12 @@ const secureElement = {
     } else {
       throw new Error(`Secure Element verification failed with code: ${result}`);
     }
-  },
-  generateKeyPair: (index: number): boolean => {
-    const result = sec_el.se_generate_keypair(index);
+  }
+
+  public generateKeyPair(index: number): boolean  {
+    const result = this.sec_el.se_generate_keypair(index);
     return result == Result.SE_SUCCESS;
   }
 };
 
-export default secureElement;
+export default SecureElement;
