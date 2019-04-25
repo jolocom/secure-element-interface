@@ -9,7 +9,8 @@ cmake ./../secure-element-abstraction/ -DTARGET_GROUP=v2 -DDYNAMIC_LINKING=OFF -
 
 echo "Build libseadyn.so..."
 make
-cp ./src/libseadyn.so ../libseadyn.so
+
+cp ./lib/SElibrary/libseadyn.so ../libseadyn.so
 cp ./test/sea_test ../sea_test
 
 cd ./..
