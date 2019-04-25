@@ -5,7 +5,7 @@ mkdir sea_build
 cd sea_build
 
 echo "Create build env with CMake..."
-cmake ./../secure-element-abstraction/ -DTARGET_GROUP=v2 -DCMAKE_TOOLCHAIN_FILE=../toolchain-rpi.cmake
+cmake ./../secure-element-abstraction/ -DTARGET_GROUP=v2 -DDYNAMIC_LINKING=OFF -DCMAKE_TOOLCHAIN_FILE=../toolchain-rpi.cmake
 
 echo "Build libseadyn.so..."
 make
