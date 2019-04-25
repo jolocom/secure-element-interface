@@ -2,7 +2,7 @@ import * as ffi from 'ffi-napi';
 import * as ref from 'ref-napi';
 import {ISecureElement} from './types';
 
-const lib_path = '../libseadyn.so';
+const lib_path = __dirname + '/../libseadyn.so';
 
 const uint8_t = ref.types.uint8;
 const uint16_t = ref.types.uint16;
