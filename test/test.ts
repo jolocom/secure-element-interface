@@ -9,22 +9,29 @@ const rand1 = SE.getRandom(64);
 const rand2 = SE.getRandom(64);
 const rand3 = SE.getRandom(64);
 
+console.log(rand1, rand2, rand3)
+
 assert( (rand1.equals(rand2) === false) &&
         (rand1.equals(rand3) === false) &&
         (rand2.equals(rand3) === false) );
 
 const indexes = [0, 1, 2, 3];
 
+console.log(indexes);
+
 console.log('Wipe all keys');
-indexes.map(n => SE.wipeKeyPair(n));
+indexes.map(n => assert(SE.wipeKeyPair(n)));
 indexes.map(n => assert.throws(() => SE.getPublicKey(n))); 
 
 console.log('Check key pair generation');
-indexes.map(n => SE.generateKeyPair(n));
+indexes.map(n => assert(SE.generateKeyPair(n)));
+
+
 
 console.log('Check key uniqueness');
 indexes.map(n => {const keyn = SE.getPublicKey(n);
                   assert(keyn.byteLength);
+                  console.log(keyn);
                   assert(keyn.equals(SE.getPublicKey(n)));
                   indexes.map(i => {if (i != n) {
                                       assert(keyn.equals(SE.getPublicKey(i)) === false);
