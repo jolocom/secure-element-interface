@@ -1,6 +1,6 @@
 {
   "name": "secure-element-interface",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "a JS interface for s Riddle and Code Secure Element",
   "main": "dist/index.js",
   "files": [
