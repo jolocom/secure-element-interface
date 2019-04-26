@@ -13,17 +13,32 @@ assert( (rand1.equals(rand2) === false) &&
         (rand1.equals(rand3) === false) &&
         (rand2.equals(rand3) === false) );
 
+const indexes = [0, 1, 2, 3];
+
+console.log('Wipe all keys');
+indexes.map(n => SE.wipeKeyPair(n));
+indexes.map(n => assert.throws(() => SE.getPublicKey(n))); 
+
 console.log('Check key pair generation');
-SE.generateKeyPair(0);
+indexes.map(n => SE.generateKeyPair(n));
 
-const key1 = SE.getPublicKey(0);
-console.log(key1.byteLength);
-assert(key1.byteLength);
-assert(key1.equals(SE.getPublicKey(0)) === true);
+console.log('Check key uniqueness');
+indexes.map(n => {const keyn = SE.getPublicKey(n);
+                  assert(keyn.byteLength);
+                  assert(keyn.equals(SE.getPublicKey(n)));
+                  indexes.map(i => {if (i != n) {
+                                      assert(keyn.equals(SE.getPublicKey(i)) === false);
+                                    }});
+                  }); 
 
-SE.generateKeyPair(0);
-const key2 = SE.getPublicKey(0);
-assert(key1.equals(key2) === false);
+console.log('Check new key difference'); 
+indexes.map(n => {const keyn = SE.getPublicKey(n);
+                  SE.generateKeyPair(n);
+                  assert(keyn.equals(SE.getPublicKey(n)) === false);
+                  });
 
+console.log('Wipe all test keys');
 SE.wipeKeyPair(0);
-assert.throws(() => SE.getPublicKey(0));
+SE.wipeKeyPair(1);
+SE.wipeKeyPair(2);
+SE.wipeKeyPair(3);
