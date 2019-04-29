@@ -32,15 +32,15 @@ const test = async () => {
   await sleep(1000);
 
   console.log('Check key uniqueness');
-  indexes.map(async n => {const keyn = SE.getPublicKey(n);
-                          await sleep(2000);
-                          assert(keyn.byteLength);
-                          console.log(keyn);
-                          assert(keyn.equals(SE.getPublicKey(n)));
-                          indexes.map(i => {if (i != n) {
-                                              assert(keyn.equals(SE.getPublicKey(i)) === false);
-                                           }});
-                          }); 
+  await Promise.all(indexes.map(async n => {const keyn = SE.getPublicKey(n);
+                                            await sleep(2000);
+                                            assert(keyn.byteLength);
+                                            console.log(keyn);
+                                            assert(keyn.equals(SE.getPublicKey(n)));
+                                            indexes.map(i => {if (i != n) {
+                                                                assert(keyn.equals(SE.getPublicKey(i)) === false);
+                                                             }});
+                                            }));
 
   console.log('Check new key difference'); 
   indexes.map(n => {const keyn = SE.getPublicKey(n);
