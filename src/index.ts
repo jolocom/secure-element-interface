@@ -19,6 +19,11 @@ enum Result {
   SE_VERIFY_FAIL = 0xF5,
 }
 
+enum SE_INIT_MDOE {
+  I2C_INIT      = 0x00,
+  I2C_RESUME    = 0x01,
+}
+
 const get_sec_el = () => ffi.Library(lib_path, {
   /**
    * SE_STATUS se_get_random(uint8_t* rand_out , uint8_t randomLen);
@@ -69,11 +74,11 @@ const get_sec_el = () => ffi.Library(lib_path, {
   'se_verify': [res_t, [uint8_t, uint8_Ptr, uint16_t, uint8_Ptr, uint16_t]],
 
   /**
-   * SE_STATUS se_init();
+   * SE_STATUS se_init(uint8_t mode);
    * Initilazes the secure element.
    * @retval ::SE_SUCCESS Upon successful execution
    */
-  'se_init': [res_t, []],
+  'se_init': [res_t, [uint8_t]],
 
   /**
    * SE_STATUS se_generate_keypair(uint8_t index);
@@ -94,15 +99,12 @@ export class SecureElement implements ISecureElement {
 
   constructor() {
     this.sec_el = get_sec_el();
-
-    const result = this.sec_el.se_init();
-    if (result != Result.SE_SUCCESS) {
-      throw new Error(`Secure Element initialisation failed with code: ${result}`);
-    }
+    this.init();
   }
 
   public getRandom(len: number): Buffer {
     const rand = Buffer.alloc(len);
+    this.resume();
     const result = this.sec_el.se_get_random(rand, len);
     if (result == Result.SE_SUCCESS) {
       return rand;
@@ -114,6 +116,7 @@ export class SecureElement implements ISecureElement {
   public getPublicKey(index: number): Buffer {
     const res_len = ref.alloc(uint16_t, 128 + 8)
     const pubKey = Buffer.alloc(ref.deref(res_len));
+    this.resume();
     const result = this.sec_el.se_get_pubkey(index, pubKey, res_len);
     if (result == Result.SE_SUCCESS) {
       return pubKey;
@@ -125,6 +128,7 @@ export class SecureElement implements ISecureElement {
   public sign(key: number, message: Buffer): Buffer {
     const sig = Buffer.alloc(100);  // TODO allocate a better size than 100
     const res_len = ref.alloc(uint16_t);
+    this.resume();
     const result = this.sec_el.se_sign(key, message, message.byteLength, sig, res_len);
     if (result == Result.SE_SUCCESS) {
       return sig;
@@ -134,6 +138,7 @@ export class SecureElement implements ISecureElement {
   }
 
   public verify(key: number, content: Buffer, signature: Buffer): boolean {
+    this.resume();
     const result = this.sec_el.se_verify(key, content, content.byteLength, signature, signature.byteLength);
     if (result == Result.SE_VERIFY_SUCCESS) {
       return true;
@@ -145,13 +150,29 @@ export class SecureElement implements ISecureElement {
   }
 
   public generateKeyPair(index: number): boolean  {
+    this.resume();
     const result = this.sec_el.se_generate_keypair(index);
     return result == Result.SE_SUCCESS;
   }
 
   public wipeKeyPair(index: number): boolean {
+    this.resume();
     const result = this.sec_el.se_wipe_device(index);
     return result == Result.SE_SUCCESS;
+  }
+
+  private init() {
+    const result = this.sec_el.se_init(SE_INIT_MDOE.I2C_INIT);
+    if (result != Result.SE_SUCCESS) {
+      throw new Error(`Secure Element initialisation failed with code: ${result}`);
+    }
+  }
+
+  private resume() {
+    const result = this.sec_el.se_init(SE_INIT_MDOE.I2C_INIT);
+    if (result != Result.SE_SUCCESS) {
+      throw new Error(`Secure Element resumption failed with code: ${result}`);
+    }
   }
 };
 
