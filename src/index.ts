@@ -169,7 +169,7 @@ export class SecureElement implements ISecureElement {
   }
 
   private resume() {
-    const result = this.sec_el.se_init(SE_INIT_MDOE.I2C_INIT);
+    const result = this.sec_el.se_init(SE_INIT_MDOE.I2C_RESUME);
     if (result != Result.SE_SUCCESS) {
       throw new Error(`Secure Element resumption failed with code: ${result}`);
     }
